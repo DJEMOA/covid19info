@@ -1,20 +1,28 @@
-//load HTTP module
-const http = require("http");
+var express = require("express");
+var app     = express();
+var path    = require("path");
 
-const hostname = "127.0.0.1";
-const port = 8000;
+    // Get data from api
+    var unirest = require("unirest");
+    var req = unirest("GET", "https://coronavirus-monitor.p.rapidapi.com/coronavirus/cases_by_country.php");  
+        
+    req.headers({
+        "x-rapidapi-host": "coronavirus-monitor.p.rapidapi.com",
+        "x-rapidapi-key": "357fc5fe18msh5d2faa76fc943fbp1c441djsnf2fd3a28dcd1"
+    });
 
-//Create HTTP server
-const server = http.createServer((req, res) => {
+    req.end(function(res) {
+        if (res.error) throw new Error(res.error);
+            
+        console.log(res.body);
+    });
 
-    //Set the response HTTP header with HTTP status and content type
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-
-    //Send the response body "Hello World"
-    res.end('Hello World\n');
+app.get('/',function(req,res){
+  res.sendFile(path.join(__dirname+'/sample1.html'));
 });
 
-//Print a log once the server starts linstening
-server.listen(port, hostname, () => {
-    console.log(`Server running at http://${hostname}:${port}/`);
-})
+app.listen(3000);
+
+
+
+console.log("Running at Port 3000");
