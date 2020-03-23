@@ -1,11 +1,15 @@
 var express = require("express");
 var app     = express();
 var path    = require("path");
+var port = 8080;
+//Setting for PROD deployment
+var compression = require('compression');
+var helmet = require('helmet');
 
 // Get data from api
 var unirest = require("unirest");
 var req = unirest("GET", "https://coronavirus-monitor.p.rapidapi.com/coronavirus/cases_by_country.php");  
-var jsonResonse;
+var jsonBodyResonse, jsonHeaderResponse;
         
 req.headers({
     "x-rapidapi-host": "coronavirus-monitor.p.rapidapi.com",
@@ -14,25 +18,23 @@ req.headers({
 
 req.end(function(res) {
     if (res.error) throw new Error(res.error);
-        
-    jsonResonse = res.body;
+
+    jsonBodyResonse = res.body;
+    jsonHeaderResponse = res.headers;
     //console.log(res.body);
-    //create map
 
 });
+
+//using PROD libs
+app.use(compression());
+app.use(helmet());
 
 app.get('/map', function(req, res){
-    res.render('map.ejs',{myData: jsonResonse});
+    res.render('map.ejs',{myData: jsonBodyResonse, myHeader: jsonHeaderResponse});
 });
 
-// app.get('/',function(req,res){
-//   res.sendFile(path.join(__dirname+'/sample1.html'));
-// });
-
- 
-
-app.listen(3000);
+app.listen(port);
 
 
-
-console.log("Running at Port 3000");
+console.log("Running at Port : " + port);
+console.log("link : http://localhost:"+port+"/map");

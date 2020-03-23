@@ -1,0 +1,5 @@
+NOTE : evangile St Jean chap 9
+
+Ajouter date de refresh sur le pup up
+Dégradé jaune => rouge
+rajouter le pourcentage par rapport à la population

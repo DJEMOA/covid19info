@@ -23,7 +23,13 @@ html, body, #container {
   <div id="container"></div>
   <script>
 // get data
-var json = <%- JSON.stringify(myData) %>;
+var myDataCollected = <%- JSON.stringify(myData) %>;
+var myHeaderCollected = <%- JSON.stringify(myHeader) %>;
+
+var jsonData = JSON.parse(myDataCollected);
+var covidStats = jsonData.countries_stat;
+var dateTime = myHeaderCollected.date;
+
 
 anychart.onDocumentReady(function () {
 	// set chart theme
@@ -35,6 +41,52 @@ anychart.theme('darkBlue');
 
         var map = anychart.map();
 
+        //Addint id in covidStats
+        var covidDetail, countriesDetails;
+        //(i = 0; i < cars.length; i++)
+        for (i = 0; i < covidStats.length; i++){
+            //remove comma from numbers
+            covidStats[i].cases = covidStats[i].cases.replace(',','');
+            covidStats[i].deaths = covidStats[i].deaths.replace(',','');
+            covidStats[i].total_recovered = covidStats[i].total_recovered.replace(',','');
+            covidStats[i].new_deaths = covidStats[i].new_deaths.replace(',','');
+            covidStats[i].new_cases = covidStats[i].new_cases.replace(',','');
+            covidStats[i].serious_critical = covidStats[i].serious_critical.replace(',','');
+            covidStats[i].active_cases = covidStats[i].active_cases.replace(',','');
+
+            for(j = 0; j < data.length; j++){
+                if (covidStats[i].country_name == data[j].name){
+                    covidStats[i]["id"] = data[j].id;
+                    covidStats[i]["population"] = data[j].population;
+                }
+            }
+        }
+
+        //set id for USA. Need to add population for USA and others
+        for (i = 0; i < covidStats.length; i++){
+           if(covidStats[i].country_name == "USA") {
+            covidStats[i]["id"] = "US"
+           }
+           if(covidStats[i].country_name == "UK") {
+            covidStats[i]["id"] = "GB"
+           }
+           if(covidStats[i].country_name == "Congo") {
+            covidStats[i]["id"] = "CD"
+           }
+           if(covidStats[i].country_name == "CAR") {
+            covidStats[i]["id"] = "CF"
+           }
+        } 
+        // set Population
+        for (i = 0; i < covidStats.length; i++){
+            for(j = 0; j < data.length; j++){
+                if (covidStats[i].id == data[j].id){
+                    covidStats[i]["population"] = data[j].population;
+                }
+            }
+        }
+        //init data
+        //data = jsonData.countries_stat
         map.credits()
                 .enabled(true)
                 .url('https://en.wikipedia.org/wiki/List_of_sovereign_states_and_dependent_territories_by_population_density')
@@ -43,52 +95,58 @@ anychart.theme('darkBlue');
 
         map.title()
                 .enabled(true)
+                .fontSize(24)
                 .useHtml(true)
                 .padding([10, 0, 10, 0])
-                .text('Population Density (people per km&#178)<br/>' +
-                        '<span  style="color:#929292; font-size: 12px;">(Data source: Wikipedia, 2015)</span>');
+                .text('Cas de Covid 19 par pays<br/>' +
+                    'Sélectionnez un pays pour avoir les informations<br/>' +
+                        '<span  style="color:#929292; font-size: 16px;">(Sources: Wikipedia & astsiatsko, last refresh : '+dateTime+')</span>');
 
         map.geoData('anychart.maps.world');
         map.interactivity().selectionMode('none');
         map.padding(0);
 
-        var dataSet = anychart.data.set(data);
-        var density_data = dataSet.mapAs({'value': 'density'});
+        var dataSet = anychart.data.set(covidStats);
+        var density_data = dataSet.mapAs({'value': 'cases'});
         var series = map.choropleth(density_data);
 
         series.labels(false);
 
         series.hovered()
-                .fill('#f48fb1')
-                .stroke(anychart.color.darken('#f48fb1'));
+                .fill('#F21C23')
+                .stroke(anychart.color.darken('#F21C23'));
 
         series.selected()
                 .fill('#c2185b')
                 .stroke(anychart.color.darken('#c2185b'));
 
         series.tooltip()
+                .fontSize(24)
                 .useHtml(true)
                 .format(function () {
-                    return '<span style="color: #d9d9d9">Density</span>: ' +
-                            parseFloat(this.value).toLocaleString() + ' pop./km&#178 <br/>' +
-                            '<span style="color: #d9d9d9">Population</span>: ' +
-                            parseInt(this.getData('population')).toLocaleString() + '<br/>' +
-                            '<span style="color: #d9d9d9">Area</span>: ' +
-                            parseInt(this.getData('area')).toLocaleString() + ' km&#178';
+                    return '<span style="color: #d9d9d9;font-size:200%"">Nombre de cas: ' +
+                            parseFloat(this.value).toLocaleString() + '</span><br/>' +
+                            '<span style="color: #d9d9d9;font-size:200%">Nombre de morts: ' +
+                            parseInt(this.getData('deaths')).toLocaleString() + '</span><br/>' +
+                            '<span style="color: #d9d9d9;font-size:200%">Nombre de guéris: ' +
+                            parseInt(this.getData('total_recovered')).toLocaleString() + '</span><br/>' +
+                            '<span style="color: #d9d9d9;font-size:200%">Population: ' +
+                            parseInt(this.getData('population')).toLocaleString() + '</span><br/>';
                 });
 
         var scale = anychart.scales.ordinalColor([
-            {less: 10},
-            {from: 10, to: 30},
-            {from: 30, to: 50},
-            {from: 50, to: 100},
-            {from: 100, to: 200},
-            {from: 200, to: 300},
-            {from: 300, to: 500},
-            {from: 500, to: 1000},
-            {greater: 1000}
+            {less: 300},
+            {from: 300, to: 600},
+            {from: 600, to: 1000},
+            {from: 1000, to: 3000},
+            {from: 3000, to: 6000},
+            {from: 6000, to: 10000},
+            {from: 10000, to: 20000},
+            {from: 20000, to: 50000},
+            {from: 50000, to: 80000},
+            {greater: 80000}
         ]);
-        scale.colors(['#81d4fa', '#4fc3f7', '#29b6f6', '#039be5', '#0288d1', '#0277bd', '#01579b', '#014377', '#000000']);
+        scale.colors(['#B3E0F6','#81d4fa', '#4fc3f7', '#29b6f6', '#039be5', '#0288d1', '#0277bd', '#01579b', '#014377', '#08088A']);
 
         var colorRange = map.colorRange();
         colorRange.enabled(true)
@@ -109,9 +167,9 @@ anychart.theme('darkBlue');
                     if (isFinite(range.start + range.end)) {
                         name = range.start + ' - ' + range.end;
                     } else if (isFinite(range.start)) {
-                        name = 'More than ' + range.start;
+                        name = 'Moins de ' + range.start;
                     } else {
-                        name = 'Less than ' + range.end;
+                        name = 'Plus de ' + range.end;
                     }
                     return name
                 });
