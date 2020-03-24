@@ -16,6 +16,10 @@ html, body, #container {
     height: 100%;
     margin: 0;
     padding: 0;
+};
+
+#test {
+
 }
 </style>
 </head>
@@ -40,6 +44,10 @@ anychart.theme('darkBlue');
     anychart.data.loadJsonFile('https://cdn.anychart.com/samples/maps-general-features/world-choropleth-map/data.json', function (data) {
 
         var map = anychart.map();
+        
+        //handle zoom
+        var zoom = anychart.ui.zoom();
+        zoom.target(map);
 
         //Addint id in covidStats
         var covidDetail, countriesDetails;
@@ -121,18 +129,19 @@ anychart.theme('darkBlue');
                 .stroke(anychart.color.darken('#c2185b'));
 
         series.tooltip()
-                .fontSize(24)
+                .allowLeaveScreen(false)
                 .useHtml(true)
                 .format(function () {
-                    return '<span style="color: #d9d9d9;font-size:200%"">Nombre de cas: ' +
+                    return '<span id="test" style="color: #d9d9d9;font-size:200%"">Nombre de cas: ' +
                             parseFloat(this.value).toLocaleString() + '</span><br/>' +
                             '<span style="color: #d9d9d9;font-size:200%">Nombre de morts: ' +
                             parseInt(this.getData('deaths')).toLocaleString() + '</span><br/>' +
                             '<span style="color: #d9d9d9;font-size:200%">Nombre de guéris: ' +
                             parseInt(this.getData('total_recovered')).toLocaleString() + '</span><br/>' +
-                            '<span style="color: #d9d9d9;font-size:200%">Population: ' +
+                            '<span style="color: #d9d9d9;font-size:calc(0.75em + 1vmin)">Population: ' +
                             parseInt(this.getData('population')).toLocaleString() + '</span><br/>';
-                });
+                })
+                .anchor("bottomLeft");
 
         var scale = anychart.scales.ordinalColor([
             {less: 300},
@@ -175,6 +184,7 @@ anychart.theme('darkBlue');
                 });
 
         series.colorScale(scale);
+        series.tooltip().fontColor("green");
 
         // create zoom controls
         var zoomController = anychart.ui.zoom();
@@ -184,6 +194,16 @@ anychart.theme('darkBlue');
         map.container('container');
         // initiate chart drawing
         map.draw();
+
+        //handle zoom
+        var controllerContainer = document.createElement('div');
+        controllerContainer.style.cssText = 'background-color: #FFECB3; padding: 5px;';
+        controllerContainer.setAttribute('id', 'controller_container');
+
+        document.body.appendChild(controllerContainer);
+
+        //Renders the zoom controller into container.
+        zoom.decorate(controllerContainer);
     });
 });
 </script>
