@@ -7,24 +7,35 @@
   <script src="https://cdn.anychart.com/releases/v8/js/anychart-data-adapter.min.js?hcode=c11e6e3cfefb406e8ce8d99fa8368d33"></script>
   <script src="https://cdn.anychart.com/geodata/2.0.0/custom/world/world.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.15/proj4.js"></script>
+  <script src="https://cdn.anychart.com/themes/2.0.0/coffee.min.js"></script>
   <script src="https://cdn.anychart.com/releases/v8/themes/dark_blue.min.js"></script>
   <link href="https://cdn.anychart.com/releases/v8/css/anychart-ui.min.css?hcode=c11e6e3cfefb406e8ce8d99fa8368d33" type="text/css" rel="stylesheet">
   <link href="https://cdn.anychart.com/releases/v8/fonts/css/anychart-font.min.css?hcode=c11e6e3cfefb406e8ce8d99fa8368d33" type="text/css" rel="stylesheet">
   <style type="text/css">
-html, body, #container {
+html, body {
     width: 100%;
     height: 100%;
     margin: 0;
     padding: 0;
-};
+}
+#container {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
 
-#test {
-
+#container2 {
+    width: 100%;
+    height: 20%;
+    margin: 0;
+    padding: 0;
 }
 </style>
 </head>
 <body>
   <div id="container"></div>
+  <!-- <div id="container2"></div> -->
   <script>
 // get data
 var myDataCollected = <%- JSON.stringify(myData) %>;
@@ -35,8 +46,21 @@ var covidStats = jsonData.countries_stat;
 var dateTime = myHeaderCollected.date;
 
 
+function kFormatter(numEntry) {
+    var numEntryNew = numEntry.replace(/\s+/g, '');
+    var num = parseInt(numEntryNew);
+    if(Math.abs(num) > 999 && Math.abs(num) < 1000000){
+        return Math.abs(num) > 999 ? Math.sign(num)*((Math.abs(num)/1000).toFixed(1)) + ' k' : Math.sign(num)*Math.abs(num)
+    } else if(Math.abs(num) > 999999 && Math.abs(num) < 1000000000){
+        return Math.abs(num) > 999999 ? Math.sign(num)*((Math.abs(num)/1000000).toFixed(1)) + ' M' : Math.sign(num)*Math.abs(num)
+    } else if(Math.abs(num) > 999999999){
+        return Math.abs(num) > 999999999 ? Math.sign(num)*((Math.abs(num)/1000000000).toFixed(1)) + ' G' : Math.sign(num)*Math.abs(num)
+    }else return numEntry;
+}
+
 anychart.onDocumentReady(function () {
 	// set chart theme
+// anychart.theme('darkBlue');
 anychart.theme('darkBlue');
 
     // The data used in this sample can be obtained from the CDN
@@ -84,6 +108,9 @@ anychart.theme('darkBlue');
            if(covidStats[i].country_name == "CAR") {
             covidStats[i]["id"] = "CF"
            }
+           if(covidStats[i].country_name == "S. Korea") {
+            covidStats[i]["id"] = "KR"
+           }
         } 
         // set Population
         for (i = 0; i < covidStats.length; i++){
@@ -106,42 +133,96 @@ anychart.theme('darkBlue');
                 .fontSize(24)
                 .useHtml(true)
                 .padding([10, 0, 10, 0])
-                .text('Cas de Covid 19 par pays<br/>' +
+                .text('<span style="text-decoration: underline; color:#f0f8ff; font-weight:bold">Informations COVID-19</span><br/>' +
+                    '<span  style="color:#c6e2ff; font-size: 18px;">'+dateTime+'</span><br/>'+
                     'Sélectionnez un pays pour avoir les informations<br/>' +
-                        '<span  style="color:#929292; font-size: 16px;">(Sources: Wikipedia & astsiatsko, last refresh : '+dateTime+')</span>');
+                        '<span  style="color:#929292; font-size: 14px;">(Sources: Wikipedia & astsiatsko)</span>');
 
         map.geoData('anychart.maps.world');
-        map.interactivity().selectionMode('none');
+        map.interactivity().selectionMode('single-select');
         map.padding(0);
+
+        // set zoom
+        var clicked = true;
+        map.listen("click", function(evt) {
+            if (clicked) {                 
+                map.zoomTo(3, evt.clientX, evt.clientY);
+            }
+            // else {
+            //     map.zoomTo(0, evt.clientX, evt.clientY);
+            // }
+        clicked = !clicked;
+        });
+       
 
         var dataSet = anychart.data.set(covidStats);
         var density_data = dataSet.mapAs({'value': 'cases'});
         var series = map.choropleth(density_data);
-
+        series.tooltip().title().fontSize(60);
         series.labels(false);
 
         series.hovered()
+                .fill('#ff6960')
+                .stroke(anychart.color.darken('#ff6960'));
+
+        series.selected()
                 .fill('#F21C23')
                 .stroke(anychart.color.darken('#F21C23'));
 
-        series.selected()
-                .fill('#c2185b')
-                .stroke(anychart.color.darken('#c2185b'));
+        // var stage = acgraph.create("container2");
+        // var layer = stage.layer();
 
+        // var textObject = layer.text(10, 10, "Click on this text");
+        // textObject.style({fontSize: "18px"});
+
+
+        // map.listen("click", function(){
+        //     textObject.text("You clicked. Congrats !!"+this.value);
+
+        //     var seriesData = series.data();
+
+        //     var filterData = seriesData.filter("value", function (value) {
+        //         console.log(value);
+        //         return value;
+        //     });
+
+        //     series.tooltip()
+        //         .enabled(false)
+        //         // .fontSize(30)
+        //         .allowLeaveScreen(true)
+        //         .separator(false)
+        //         // .useHtml(true)
+        //         .fontSize(30)
+        //         .format(function () {
+        //             textObject.text("You clicked. Congrats !!"+this.value);
+        //             return '<span  style="color: #d9d9d9;font-size:80%""><b>' +
+        //                     parseFloat(this.value).toLocaleString() + '</b> cas.</span><br/>' +
+        //                     '<span style="color: #d9d9d9;font-size:80%"><b>' +
+        //                     parseInt(this.getData('deaths')).toLocaleString() + '</b> morts.</span><br/>' +
+        //                     '<span style="color: #d9d9d9;font-size:80%"><b>' +
+        //                     parseInt(this.getData('total_recovered')).toLocaleString() + '</b> guéris.</span><br/>'
+        //                     +'<span style="color: #d9d9d9;font-size:50%"><b>' +
+        //                     parseInt(this.getData('population')).toLocaleString() + '</b> habs</span><br/>';
+        //         });
+        // });
+        
         series.tooltip()
+                // .fontSize(30)
                 .allowLeaveScreen(false)
+                .separator(true)
                 .useHtml(true)
+                .fontSize(30)
                 .format(function () {
-                    return '<span id="test" style="color: #d9d9d9;font-size:200%"">Nombre de cas: ' +
-                            parseFloat(this.value).toLocaleString() + '</span><br/>' +
-                            '<span style="color: #d9d9d9;font-size:200%">Nombre de morts: ' +
-                            parseInt(this.getData('deaths')).toLocaleString() + '</span><br/>' +
-                            '<span style="color: #d9d9d9;font-size:200%">Nombre de guéris: ' +
-                            parseInt(this.getData('total_recovered')).toLocaleString() + '</span><br/>' +
-                            '<span style="color: #d9d9d9;font-size:calc(0.75em + 1vmin)">Population: ' +
-                            parseInt(this.getData('population')).toLocaleString() + '</span><br/>';
-                })
-                .anchor("bottomLeft");
+                    return '<span  style="color: #d9d9d9;font-size:150%;font-family:Times New Roman"><b>' +
+                            kFormatter(parseFloat(this.value).toLocaleString()) + '</b> cas.</span><br/>' +
+                            '<span style="color: #d9d9d9;font-size:150%;font-family:Times New Roman"><b>' +
+                            kFormatter(parseInt(this.getData('deaths')).toLocaleString()) + '</b> morts.</span><br/>' +
+                            '<span style="color: #d9d9d9;font-size:150%;font-family:Times New Roman"><b>' +
+                            kFormatter(parseInt(this.getData('total_recovered')).toLocaleString()) + '</b> guéris.</span><br/>'
+                            +'<span style="color: #d9d9d9;font-size:150%;font-family:Times New Roman"><b>' +
+                            kFormatter(parseInt(this.getData('population')).toLocaleString()) + '</b> habs</span><br/>';
+                });
+
 
         var scale = anychart.scales.ordinalColor([
             {less: 300},
@@ -187,12 +268,16 @@ anychart.theme('darkBlue');
         series.tooltip().fontColor("green");
 
         // create zoom controls
-        var zoomController = anychart.ui.zoom();
-        zoomController.render(map);
+        // var zoomController = anychart.ui.zoom();
+        // zoomController.render(map);
 
         // set container id for the chart
         map.container('container');
+
+        // map.tooltip().positionMode("chart");
+        // map.tooltip().anchor("topLeft");
         // initiate chart drawing
+        map.interactivity().zoomOnMouseWheel(true);
         map.draw();
 
         //handle zoom
