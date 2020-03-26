@@ -7,22 +7,23 @@ var compression = require('compression');
 var helmet = require('helmet');
 
 // Get data from api
+function getAPIData(){
+    
+}
 var unirest = require("unirest");
-var req = unirest("GET", "https://coronavirus-monitor.p.rapidapi.com/coronavirus/cases_by_country.php");  
+var reqAPI = unirest("GET", "https://coronavirus-monitor.p.rapidapi.com/coronavirus/cases_by_country.php");  
 var jsonBodyResonse, jsonHeaderResponse;
         
-req.headers({
+reqAPI.headers({
     "x-rapidapi-host": "coronavirus-monitor.p.rapidapi.com",
     "x-rapidapi-key": "357fc5fe18msh5d2faa76fc943fbp1c441djsnf2fd3a28dcd1"
 });
 
-req.end(function(res) {
+reqAPI.end(function(res) {
     if (res.error) throw new Error(res.error);
 
     jsonBodyResonse = res.body;
     jsonHeaderResponse = res.headers;
-    //console.log(res.body);
-
 });
 
 //using PROD libs

@@ -133,7 +133,7 @@ anychart.theme('darkBlue');
                 .fontSize(24)
                 .useHtml(true)
                 .padding([10, 0, 10, 0])
-                .text('<span style="text-decoration: underline; color:#f0f8ff; font-weight:bold">Informations COVID-19</span><br/>' +
+                .text('<span style="text-decoration: underline; color:#f0f8ff; font-weight:bold">COVID-19 : Informations en temps réel</span><br/>' +
                     '<span  style="color:#c6e2ff; font-size: 18px;">'+dateTime+'</span><br/>'+
                     'Sélectionnez un pays pour avoir les informations<br/>' +
                         '<span  style="color:#929292; font-size: 14px;">(Sources: Wikipedia & astsiatsko)</span>');
@@ -213,13 +213,13 @@ anychart.theme('darkBlue');
                 .useHtml(true)
                 .fontSize(30)
                 .format(function () {
-                    return '<span  style="color: #d9d9d9;font-size:150%;font-family:Times New Roman"><b>' +
+                    return '<span  style="color: #ff6960;font-size:160%;font-family:Times New Roman"><b>' +
                             kFormatter(parseFloat(this.value).toLocaleString()) + '</b> cas.</span><br/>' +
-                            '<span style="color: #d9d9d9;font-size:150%;font-family:Times New Roman"><b>' +
+                            '<span style="color: #ff6960;font-size:160%;font-family:Times New Roman"><b>' +
                             kFormatter(parseInt(this.getData('deaths')).toLocaleString()) + '</b> morts.</span><br/>' +
-                            '<span style="color: #d9d9d9;font-size:150%;font-family:Times New Roman"><b>' +
+                            '<span style="color: #51FF0D;font-size:160%;font-family:Times New Roman"><b>' +
                             kFormatter(parseInt(this.getData('total_recovered')).toLocaleString()) + '</b> guéris.</span><br/>'
-                            +'<span style="color: #d9d9d9;font-size:150%;font-family:Times New Roman"><b>' +
+                            +'<span style="color: #d9d9d9;font-size:160%;font-family:Times New Roman"><b>' +
                             kFormatter(parseInt(this.getData('population')).toLocaleString()) + '</b> habs</span><br/>';
                 });
 
