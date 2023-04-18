@@ -1,6 +1,6 @@
 # covid19info
 
-## Brief description
+## Brief summary
 This is a website that gives in real time some statistics of covid 19 cases in a world map.
 
 ## Technos
